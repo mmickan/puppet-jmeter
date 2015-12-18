@@ -10,6 +10,7 @@ class jmeter (
   $installer_path  = $::jmeter::params::installer_path,
   $bin_path        = $::jmeter::params::bin_path,
   $version         = $::jmeter::params::version,
+  $java_version    = $::jmeter::params::java_version,
   $plugins_install = $::jmeter::params::plugins_install,
   $plugins_version = $::jmeter::params::plugins_version,
   $plugins_set     = $::jmeter::params::plugins_set,
@@ -19,8 +20,8 @@ class jmeter (
   Exec { path => '/bin:/usr/bin:/usr/sbin' }
 
   $jdk_pkg = $::osfamily ? {
-    debian => "openjdk-${java_version}-jre-headless",
-    redhat => "java-1.${java_version}.0-openjdk"
+    'Debian' => "openjdk-${java_version}-jre-headless",
+    'RedHat' => "java-1.${java_version}.0-openjdk"
   }
 
   ensure_packages([$jdk_pkg, 'unzip', 'wget'])

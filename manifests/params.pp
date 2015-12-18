@@ -6,6 +6,7 @@ class jmeter::params {
       $installer_path  = '/opt'
       $bin_path        = '/usr/local/bin'
       $version         = '2.13'
+      $java_version    = '8'
       $plugins_install = true
       $plugins_version = '1.2.1'
       $plugins_set     = ['Standard']
