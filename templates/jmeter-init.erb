@@ -15,10 +15,10 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Apache JMeter Remote Server"
 NAME=jmeter
-JMETER_PATH=/usr/share/jmeter
+JMETER_PATH=<%= @installer_path %>/jmeter
 # Change this to your IP
-JMETER_IP=<%= server_ip %>
-JMETER_PORT=1099
+JMETER_IP=<%= @server_ip %>
+JMETER_PORT=<%= @server_port %>
 DAEMON="$JMETER_PATH/bin/$NAME"
 DAEMON_ARGS="-Djava.rmi.server.hostname=$JMETER_IP -Dserver_port=$JMETER_PORT -s -j $JMETER_PATH/bin/jmeter-server.log"
 PIDFILE=/var/run/$NAME.pid

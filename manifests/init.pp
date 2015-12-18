@@ -14,7 +14,6 @@ class jmeter (
   $plugins_version = $::jmeter::params::plugins_version,
   $plugins_set     = $::jmeter::params::plugins_set,
   $user_config     = $::jmeter::params::user_config,
-  $user_config     = $::jmeter::params::user_config,
 ) inherits jmeter::params {
 
   Exec { path => '/bin:/usr/bin:/usr/sbin' }
