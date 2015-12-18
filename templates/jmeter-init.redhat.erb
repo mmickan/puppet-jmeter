@@ -11,19 +11,29 @@
 ### END INIT INFO
 
 # Author: Brian Flad <bflad417 at gmail dot com>
-
+# Modified: Scott Doane <sdoane@austin.utexas.edu>
+#
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
+#Location of JAVA_HOME (bin files)
+export JAVA_HOME=/etc/alternatives/jre
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Apache JMeter Remote Server"
 NAME=jmeter
-JMETER_PATH=/usr/share/jmeter
+JMETER_PATH=<%= @installer_path -%>/jmeter
 # Change this to your IP
 RMI_HOST_DEF="-Djava.rmi.server.hostname=<%= @server_ip %>"
-SERVER_PORT=1099
+SERVER_PORT=<%= @server_port %>
 SERVER_CMD="$JMETER_PATH/bin/$NAME-server"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
-JAVA_PID=`ps ax --width=1000 | grep "[A]pacheJMeter.jar -Dserver_port=1099 -s"|awk '{printf $1 ""}'`
+JMETER_PID=`ps ax --width=1000 | grep "[A]pacheJMeter.jar -Dserver_port=1099 -s"|awk '{printf $1 ""}'`
+
+#SHUTDOWN_WAIT is wait time in seconds for java proccess to stop
+SHUTDOWN_WAIT=20
+
+jmeter_pid() {
+        echo `ps ax --width=1000 | grep "[A]pacheJMeter.jar -Dserver_port=1099 -s"|awk '{printf $1 ""}'`
+}
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -40,72 +50,92 @@ JAVA_PID=`ps ax --width=1000 | grep "[A]pacheJMeter.jar -Dserver_port=1099 -s"|a
 #
 # Function that starts the daemon/service
 #
-do_start()
-{
-        [ -n "$JAVA_PID" ] && echo "$NAME already started" && exit 0
-        echo -n "Starting $NAME: "
-        $JMETER_PATH/bin/$NAME-server 2>&1 &
-        RETVAL=$?
-        MODE="normal"
-        echo "$NAME started in $MODE mode"
-        [ $RETVAL = 0 ] && touch /var/lock/subsys/$NAME
+start() {
+  pid=$(jmeter_pid)
+  if [ -n "$pid" ]
+  then
+    echo -e "\e[00;31mJmeter is already running (pid: $pid)\e[00m"
+  else
+    # Start jmeter
+    echo -e "\e[00;32mStarting jmeter\e[00m"
+    $JMETER_PATH/bin/$NAME-server $RMI_HOST_DEF 2>&1 &
+    sleep 3
+    status
+  fi
+  return 0
 }
 
 #
 # Function that stops the daemon/service
 #
-do_stop()
-{
-        [ -z "$JAVA_PID" ] && echo "$NAME already stopped" && exit 0
-        echo -n "Shutting down $NAME: "
-        kill $JAVA_PID
-        RETVAL=$?
-        echo
-        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/$NAME
+stop() {
+  pid=$(jmeter_pid)
+  if [ -n "$pid" ]
+  then
+    echo -e "\e[00;31mStoping Jmeter\e[00m"
+    kill $pid
+
+    let kwait=$SHUTDOWN_WAIT
+    count=0;
+    until [ `ps -p $pid | grep -c $pid` = '0' ] || [ $count -gt $kwait ]
+    do
+      echo -n -e "\n\e[00;31mwaiting for processes to exit\e[00m" && echo;
+      sleep 1
+      let count=$count+1;
+    done
+
+    if [ $count -gt $kwait ]; then
+      echo -n -e "\n\e[00;31mkilling processes that didn't stop after $SHUTDOWN_WAIT seconds\e[00m"
+      terminate
+    fi
+
+  else
+    echo -e "\e[00;31mJmeter is not running\e[00m"
+  fi
+  return 0
 }
 
 #
 # Function that gives status of daemon/server
 #
-do_status()
-{
-        if [ -n "$JAVA_PID" ]; then
-            MODE="RUNNING pid $JAVA_PID"
-            RETVAL=0
-        else
-            MODE="STOPPED"
-            RETVAL=1
-        fi
-        echo "$NAME is $MODE"
+status() {
+  pid=$(jmeter_pid)
+  if [ -n "$pid" ]
+    then echo -e "\e[00;32mJmeter is running with pid: $pid\e[00m"
+  else
+    echo -e "\e[00;31mJmeter is not running\e[00m"
+    return 3
+  fi
 }
 
-#
-# Function that stops and restarts daemon/server
-#
-do_restart()
-{
-        do_stop
-        do_start
+terminate() {
+	echo -e "\e[00;31mTerminating Jmeter\e[00m"
+	kill -9 $(jmeter_pid)
 }
+
 
 case "$1" in
   start)
-        do_start
+        start
         ;;
   stop)
-        do_stop
+        stop
         ;;
   status)
-        do_status
+        status
         ;;
   restart|force-reload)
-        do_restart
+        stop
+        start
         ;;
+  kill)
+		    terminate
+	      ;;
   condrestart)
-        [ -e /var/lock/subsys/$NAME ] && do_restart
+        [ -e /var/lock/subsys/$NAME ] && restart
         ;;
   *)
-        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|kill}" >&2
         exit 3
         ;;
 esac

@@ -1,0 +1,7 @@
+# This user.properties file is managed by puppet
+#
+# Setting in this file will override jmeter.properties
+#
+<% @user_config.each do |k,v| -%>
+<%= k -%>=<%= v -%>
+<% end -%>

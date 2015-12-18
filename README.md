@@ -44,3 +44,6 @@ Morten Wulff
 Dario Duvnjak   
 [@darioduvnjak](https://twitter.com/darioduvnjak)
 http://dtk.io/
+
+Scott Doane
+<sdoane@austin.utexas.edu>

@@ -6,7 +6,10 @@
 #
 #   class { 'jmeter::server': }
 #
-class jmeter::server($server_ip = '0.0.0.0') {
+class jmeter::server (
+  $server_ip    = $::jmeter::params::server_ip,
+  $server_port  = $::jmeter::params::server_port,
+) inherits jmeter::params {
   include jmeter
 
   $init_template = $::osfamily ? {
@@ -33,6 +36,6 @@ class jmeter::server($server_ip = '0.0.0.0') {
     ensure    => running,
     enable    => true,
     require   => File['/etc/init.d/jmeter'],
-    subscribe => [File['/etc/init.d/jmeter'], Exec['install-jmeter-plugins']],
+    subscribe => File['/etc/init.d/jmeter'],
   }
 }

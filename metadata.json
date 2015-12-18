@@ -1,15 +1,13 @@
 {
-  "name": "dduvnjak/jmeter",
-  "version": "0.2.1",
-  "author": "dduvnjak",
+  "name": "scottdoane/jmeter",
+  "version": "0.2.2",
+  "author": "scottdoane",
   "summary": "Module for JMeter configuration",
   "license": "Apache-2.0",
-  "source": "https://github.com/dduvnjak/puppet-jmeter",
-  "project_page": "https://github.com/dduvnjak/puppet-jmeter",
-  "issues_url": "https://github.com/dduvnjak/puppet-jmeter/issues",
-  "dependencies": [
-    {"name":"puppetlabs/stdlib","version_requirement":">=4.4.0"}
-  ],
+  "source": "https://github.com/scottdoane/puppet-jmeter",
+  "project_page": "https://github.com/scottdoane/puppet-jmeter",
+  "issues_url": "https://github.com/scottdoane/puppet-jmeter/issues",
+  "dependencies": [],
     "operatingsystem_support": [
     {
       "operatingsystem": "Debian",
@@ -37,4 +35,3 @@
     }
   ]
 }
-
