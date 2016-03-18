@@ -21,6 +21,9 @@ class jmeter (
   $real_download_url = pick($download_url, "${download_url_base}/apache-jmeter-${version}.tgz")
 
   include staging
+  file { "${::staging::path}/jmeter":
+    ensure => 'directory',
+  } ->
   staging::file { "apache-jmeter":
     source => $real_download_url,
     target => "${::staging::path}/jmeter/apache-jmeter-${version}.tgz",
