@@ -20,7 +20,7 @@ JMETER_PATH=<%= @installer_path %>/jmeter
 JMETER_IP=<%= @server_ip %>
 JMETER_PORT=<%= @server_port %>
 DAEMON="$JMETER_PATH/bin/$NAME"
-DAEMON_ARGS="-Djava.rmi.server.hostname=$JMETER_IP -Dserver_port=$JMETER_PORT -s -j $JMETER_PATH/bin/jmeter-server.log"
+DAEMON_ARGS="-Djava.rmi.server.hostname=$JMETER_IP -Dserver_port=$JMETER_PORT -s -j /var/log/jmeter-server.log"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
@@ -75,8 +75,15 @@ do_stop()
         # that waits for the process to drop all resources that could be
         # needed by services started subsequently.  A last resort is to
         # sleep for some time.
-        start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
-        [ "$?" = 2 ] && return 2
+        for count in $(seq 1 30); do
+                java_pid=$(pgrep -f "[A]pacheJMeter.jar $DAEMON_ARGS")
+                [ -n "$java_pid" ] && kill $java_pid
+                java_pid=$(pgrep -f "[A]pacheJMeter.jar $DAEMON_ARGS")
+                [ -z "$java_pid" ] && break
+                sleep 1
+        done
+        java_pid=$(pgrep -f "[A]pacheJMeter.jar $DAEMON_ARGS")
+        [ -n "$java_pid" ] && kill -9 $java_pid
         # Many daemons don't delete their pidfiles when they exit.
         rm -f $PIDFILE
         return "$RETVAL"
